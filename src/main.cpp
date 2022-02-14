@@ -6,6 +6,8 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 
+#include <SPIFFS.h>
+
 #include <qrcode.h>
 
 #define OLED_CLOCK 15 // Pins for the OLED display
@@ -13,15 +15,13 @@
 #define OLED_RESET 16
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C g_OLED(U8G2_R2, OLED_RESET, OLED_CLOCK, OLED_DATA);
 
-
-#ifndef WIFI_PWD 
-#pragma message "WIFI_PWD not defined!" 
+#ifndef WIFI_PWD
+#pragma message "WIFI_PWD not defined!"
 #endif
 
 #ifndef WIFI_SSID2
-#pragma message "WIFI_SSID2 not defined!" 
-#endif 
-
+#pragma message "WIFI_SSID2 not defined!"
+#endif
 
 const char WIFI_SSID[] = WIFI_SSID2;
 const char WIFI_PASSWORD[] = WIFI_PWD;
@@ -30,7 +30,6 @@ int g_fontht = 0;
 wl_status_t wifi_status = WL_DISCONNECTED;
 
 AsyncWebServer server(80);
-
 
 void DrawQRCode(const char *url, int ox, int oy, int size)
 {
@@ -124,6 +123,12 @@ void setup()
     }
     Serial.println("ESP32 Startup");
 
+    if (!SPIFFS.begin(true))
+    {
+        Serial.println("An Error has occurred while mounting SPIFFS");
+        return;
+    }
+
     g_OLED.begin();                         // One-time startup
     g_OLED.clear();                         // Clear the screen
     g_OLED.setFont(u8g2_font_profont15_tf); // Choose a suitable font
@@ -157,6 +162,7 @@ void setup()
         g_OLED.setCursor(64, g_fontht);
 
         g_OLED.printf("IP: %s", ipaddr);
+        Serial.println(ipaddr);
         DrawQRCode(ipaddr, 0, 0, 2);
     }
     else
@@ -166,15 +172,15 @@ void setup()
     }
     g_OLED.sendBuffer();
 
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+               { request->send_P(200, "text/html", index_html); });
+    server.on("/index.html", HTTP_GET, [](AsyncWebServerRequest *request)
+              { request->send(SPIFFS, "/index.html", "text/html"); });
 
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send_P(200, "text/html", index_html );
-  });
+    server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request)
+              { request->send(SPIFFS, "/style.css", "text/css"); });
 
-  server.begin();
-
-
-
+    server.begin();
 }
 
 void loop()
