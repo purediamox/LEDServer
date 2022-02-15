@@ -137,15 +137,16 @@ void HandleSetColor(AsyncWebServerRequest *request)
 void setup()
 {
     // put your setup code here, to run once:
-    // put your setup code here, to run once:
     pinMode(LED_BUILTIN, OUTPUT);
 
+    // start serial port for logging
     Serial.begin(9600);
     while (!Serial)
     {
     }
     Serial.println("ESP32 Startup");
 
+    // start SPIFFS file system for webserver
     if (!SPIFFS.begin(true))
     {
         Serial.println("An Error has occurred while mounting SPIFFS");
@@ -156,17 +157,14 @@ void setup()
     g_OLED.clear();                         // Clear the screen
     g_OLED.setFont(u8g2_font_profont15_tf); // Choose a suitable font
     g_fontht = g_OLED.getFontAscent() - g_OLED.getFontDescent();
-
+ 
     digitalWrite(LED_BUILTIN, LOW); // Turn off the Onboard LED
-
-    // WiFi.mode(WIFI_STA);
-
     int count = 0;
     while (wifi_status != WL_CONNECTED && count++ < 10)
     {
         g_OLED.clearBuffer();
         g_OLED.setCursor(0, g_fontht);
-        g_OLED.printf("wifi_status %d", wifi_status);
+        g_OLED.printf("Connecting %.*s", count, "..........");
         g_OLED.sendBuffer();
         wifi_status = WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
         delay(3000);
@@ -195,9 +193,9 @@ void setup()
     }
     g_OLED.sendBuffer();
 
+    // set up WebServer
     server.on("/api/setcolor", HTTP_GET, HandleSetColor);
-    
-    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+        server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
           { request->send(SPIFFS, "/index.html", "text/html"); });
     
     server.serveStatic("/scripts", SPIFFS, "/scripts");
@@ -211,8 +209,10 @@ void setup()
 // server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request)
 //           { request->send(SPIFFS, "/style.css", "text/css"); });
 
-server.begin();
+    server.begin();
 }
+
+
 
 void loop()
 {
