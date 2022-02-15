@@ -111,6 +111,29 @@ void scanNetworks()
     delay(5000);
 }
 
+void HandleSetColor(AsyncWebServerRequest *request)
+{
+    // List all parameters
+    int params = request->params();
+    for (int i = 0; i < params; i++)
+    {
+        AsyncWebParameter *p = request->getParam(i);
+        if (p->isFile())
+        { // p->isPost() is also true
+            Serial.printf("FILE[%s]: %s, size: %u\n", p->name().c_str(), p->value().c_str(), p->size());
+        }
+        else if (p->isPost())
+        {
+            Serial.printf("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
+        }
+        else
+        {
+            Serial.printf("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
+        }
+        request->send(200, "OK");
+    }
+}
+
 void setup()
 {
     // put your setup code here, to run once:
@@ -172,15 +195,23 @@ void setup()
     }
     g_OLED.sendBuffer();
 
+    server.on("/api/setcolor", HTTP_GET, HandleSetColor);
+    
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-               { request->send_P(200, "text/html", index_html); });
-    server.on("/index.html", HTTP_GET, [](AsyncWebServerRequest *request)
-              { request->send(SPIFFS, "/index.html", "text/html"); });
+          { request->send(SPIFFS, "/index.html", "text/html"); });
+    
+    server.serveStatic("/scripts", SPIFFS, "/scripts");
 
-    server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request)
-              { request->send(SPIFFS, "/style.css", "text/css"); });
+// see: https://github.com/me-no-dev/ESPAsyncWebServer#respond-with-content-coming-from-a-file
+// server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+//           { request->send_P(200, "text/html", index_html); });
+// server.on("/index.html", HTTP_GET, [](AsyncWebServerRequest *request)
+//          { request->send(SPIFFS, "/index.html", "text/html"); });
 
-    server.begin();
+// server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request)
+//           { request->send(SPIFFS, "/style.css", "text/css"); });
+
+server.begin();
 }
 
 void loop()

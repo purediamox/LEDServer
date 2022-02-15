@@ -4,12 +4,22 @@
   <title>ESP32 Web Server</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" type="text/css" href="style.css">
+  <link rel="stylesheet" type="text/css" href="scripts/style.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/vanilla-picker@2"></script>
+  <script src="scripts/main.js"></script>
 </head>
 <body>
   <h1>ESP32 Web Server</h1>
   <p>GPIO state: <strong> %STATE%</strong></p>
   <p><a href="/on"><button class="button">ON</button></a></p>
   <p><a href="/off"><button class="button button2">OFF</button></a></p>
+  <p><button id="parent">Colour</button></p>
 </body>
+
+<script>
+ $(document).ready(init());
+    
+</script>
+
 </html>
