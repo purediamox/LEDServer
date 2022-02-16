@@ -38,8 +38,12 @@ const char WIFI_PASSWORD[] = WIFI_PWD;
 
 
 
+
 #include "ledgfx.h"         // helper functions from Dave Plummer
 #include "comet.h"
+
+CEffect * g_pEffect = new CCometEffect();
+
 
 /**
  * Parses color value "#RRGGBB" into a CGRB value
@@ -229,9 +233,8 @@ void setup()
 }
 
 
-
 void loop()
 {
-    DrawComet();
+    g_pEffect->Draw();
     FastLED.delay(50);
 }
