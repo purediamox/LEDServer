@@ -10,6 +10,17 @@
 
 #include <qrcode.h>
 
+
+#include <FastLED.h>
+#define NUM_LEDS    30          // FastLED definitions
+#define LED_PIN     5
+
+CRGB g_LEDs[NUM_LEDS] = {0};    // Frame buffer for FastLED
+int g_Brightness = 10;         // 0-255 LED brightness scale
+int g_PowerLimit = 900;         // 900mW Power Limit
+
+CRGB g_color = CRGB::Red;
+
 #define OLED_CLOCK 15 // Pins for the OLED display
 #define OLED_DATA 4
 #define OLED_RESET 16
@@ -22,14 +33,31 @@ U8G2_SSD1306_128X64_NONAME_F_HW_I2C g_OLED(U8G2_R2, OLED_RESET, OLED_CLOCK, OLED
 #ifndef WIFI_SSID2
 #pragma message "WIFI_SSID2 not defined!"
 #endif
-
 const char WIFI_SSID[] = WIFI_SSID2;
 const char WIFI_PASSWORD[] = WIFI_PWD;
+
+
+
+#include "ledgfx.h"         // helper functions from Dave Plummer
+#include "comet.h"
+
+/**
+ * Parses color value "#RRGGBB" into a CGRB value
+ */
+CRGB ParseRGBA(const char* rrggbb)
+{
+    int i_hex = std::strtol(rrggbb + 1, nullptr, 16);
+    return CRGB(i_hex);
+}
 
 int g_fontht = 0;
 wl_status_t wifi_status = WL_DISCONNECTED;
 
 AsyncWebServer server(80);
+
+
+
+
 
 void DrawQRCode(const char *url, int ox, int oy, int size)
 {
@@ -52,37 +80,10 @@ void DrawQRCode(const char *url, int ox, int oy, int size)
     }
 }
 
-const char index_html[] PROGMEM = R"rawliteral(
-<!DOCTYPE HTML><html>
-<head>
-  <title>ESP32 WEB SERVER</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="data:,">
-  <style>
-    html {font-family: Arial; display: inline-block; text-align: center;}
-    p {font-size: 3.0rem;}
-    body {max-width: 600px; margin:0px auto; padding-bottom: 25px;}
-    .switch {position: relative; display: inline-block; width: 120px; height: 68px} 
-    .switch input {display: none}
-    .slider {position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; border-radius: 6px}
-    .slider:before {position: absolute; content: ""; height: 52px; width: 52px; left: 8px; bottom: 8px; background-color: #fff; -webkit-transition: .4s; transition: .4s; border-radius: 3px}
-    input:checked+.slider {background-color: #b30000}
-    input:checked+.slider:before {-webkit-transform: translateX(52px); -ms-transform: translateX(52px); transform: translateX(52px)}
-  </style>
-</head>
-<body>
-  <h2>ESP32 WEB SERVER</h2>
-  %BUTTONPLACEHOLDER%
-<script>function toggleCheckbox(element) {
-  var xhr = new XMLHttpRequest();
-  if(element.checked){ xhr.open("GET", "/update?output="+element.id+"&state=1", true); }
-  else { xhr.open("GET", "/update?output="+element.id+"&state=0", true); }
-  xhr.send();
-}
-</script>
-</body>
-</html>
-)rawliteral";
+//const char index_html[] PROGMEM = R"rawliteral(
+//<!DOCTYPE HTML><html>
+//<head>
+//)rawliteral";
 
 void scanNetworks()
 {
@@ -132,6 +133,13 @@ void HandleSetColor(AsyncWebServerRequest *request)
         }
         request->send(200, "OK");
     }
+
+    if (request->hasParam("color"))
+    {
+        const char* color_code = request->getParam("color")->value().c_str();
+        g_color = ParseRGBA(color_code);
+    }
+
 }
 
 void setup()
@@ -210,11 +218,20 @@ void setup()
 //           { request->send(SPIFFS, "/style.css", "text/css"); });
 
     server.begin();
+
+    // FASTLED
+    FastLED.addLeds<WS2812B, LED_PIN, GRB>(g_LEDs, NUM_LEDS);               // Add our LED strip to the FastLED library
+    FastLED.setBrightness(g_Brightness);
+    set_max_power_indicator_LED(LED_BUILTIN);                               // Light the builtin LED if we power throttle
+    FastLED.setMaxPowerInMilliWatts(g_PowerLimit);                          // Set the power limit, above which brightness will be throttled
+
+
 }
 
 
 
 void loop()
 {
-    // put your main code here, to run repeatedly:
+    DrawComet();
+    FastLED.delay(50);
 }

@@ -10,11 +10,8 @@
   <script src="scripts/main.js"></script>
 </head>
 <body>
-  <h1>ESP32 Web Server</h1>
-  <p>GPIO state: <strong> %STATE%</strong></p>
-  <p><a href="/on"><button class="button">ON</button></a></p>
-  <p><a href="/off"><button class="button button2">OFF</button></a></p>
-  <p><button id="parent">Colour</button></p>
+  <h1>Mark's ESP32 Light Server</h1>
+  <input id="color_picker" type="color" oninput="set_Color(document.getElementById('color_picker').value)"></input>
 </body>
 
 <script>
