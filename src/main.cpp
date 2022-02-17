@@ -9,6 +9,8 @@
 #include <SPIFFS.h>
 
 #include <qrcode.h>
+#include <AsyncJson.h>
+#include <ArduinoJson.h>
 
 
 #define OLED_CLOCK 15 // Pins for the OLED display
@@ -106,6 +108,22 @@ void scanNetworks()
     delay(5000);
 }
 
+
+void HandleGetEffects(AsyncWebServerRequest *request)
+{
+    // See: https://arduinojson.org/ - for details on constructing JSON
+    Serial.println("geteffects");
+    AsyncResponseStream *response = request->beginResponseStream("application/json");
+    DynamicJsonDocument doc(1024);
+    for (int i = 0; i < CFX._effects.size(); i++) {
+        doc["effects"][i]["n"] = i;
+        doc["effects"][i]["name"] = CFX._effects.at(i)->name;
+    }
+        
+    serializeJson(doc, *response);
+    request->send(response);    
+}
+
 void HandleSetColor(AsyncWebServerRequest *request)
 {
     // List all parameters
@@ -197,7 +215,9 @@ void setup()
 
     // set up WebServer
     server.on("/api/setcolor", HTTP_GET, HandleSetColor);
-        server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+    server.on("/api/geteffects", HTTP_GET, HandleGetEffects);
+    
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
           { request->send(SPIFFS, "/index.html", "text/html"); });
     
     server.serveStatic("/scripts", SPIFFS, "/scripts");
