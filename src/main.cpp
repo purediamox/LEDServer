@@ -131,7 +131,7 @@ void HandleSetColor(AsyncWebServerRequest *request)
     if (request->hasParam("color"))
     {
         const char* color_code = request->getParam("color")->value().c_str();
-        CEffectMgr::color = ParseRGBA(color_code);
+        CFX.color = ParseRGBA(color_code);
     }
 
 }
@@ -213,7 +213,7 @@ void setup()
 
     server.begin();
 
-    CEffectMgr::init(30);           // initialize with 30 LEDs
+    CFX.init(30);           // initialize with 30 LEDs
 
 
 
@@ -222,6 +222,6 @@ void setup()
 
 void loop()
 {
-    CEffectMgr::getActiveEffect()->Draw();
+    CFX.getActiveEffect()->Draw();
     FastLED.delay(50);
 }

@@ -21,25 +21,27 @@ class CEffect;
 class CEffectMgr 
 {
 private:
-    static int   g_numLEDs;     // total number of LEDs
-    static CRGB* g_pLEDs;
-    static const int g_Brightness = 10;         // 0-255 LED brightness scale
-    static const int g_PowerLimit = 900;         // 900mW Power Limit
-    static std::vector<CEffect*> g_Effects;
-    static int g_active;
+    int   g_numLEDs;     // total number of LEDs
+    CRGB* g_pLEDs;
+    const int g_Brightness = 10;         // 0-255 LED brightness scale
+    const int g_PowerLimit = 900;         // 900mW Power Limit
+    std::vector<CEffect*> g_Effects;
+    int g_active;
 
 public:
-    static int getNumLeds();
-    static int getLEDs();
-    static CRGB color;
-    static void init(int NumLeds);
-    inline static CRGB* LEDs()  { return g_pLEDs; };
-
-    static CEffect* getActiveEffect();
-
+    CEffectMgr();
     virtual ~CEffectMgr();
+
+     int getNumLeds();
+     int getLEDs();
+     CRGB color;
+     void init(int NumLeds);
+    inline  CRGB* LEDs()  { return g_pLEDs; };
+
+    CEffect* getActiveEffect();
 };
 
+extern CEffectMgr CFX;          // singleton
 
 class CEffect
 {
@@ -51,8 +53,8 @@ public:
     virtual ~CEffect() {};
     virtual void Draw();
 
-    inline int size() { return CEffectMgr::getNumLeds();};
-    inline CRGB* LEDs() { return CEffectMgr::LEDs();};
+    inline int size() { return CFX.getNumLeds();};
+    inline CRGB* LEDs() { return CFX.LEDs();};
 };
 
 

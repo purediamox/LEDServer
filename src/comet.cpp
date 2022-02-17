@@ -4,19 +4,22 @@
 #include "comet.h"
 
 #define LED_PIN     5
-    
-int   CEffectMgr::g_numLEDs = 0;
-CRGB* CEffectMgr::g_pLEDs = NULL;
-std::vector<CEffect*> CEffectMgr::g_Effects;
+
+CEffectMgr CFX;          // singleton
+
+CEffectMgr::CEffectMgr() 
+{
+    g_numLEDs = 0;
+    g_pLEDs = NULL;
+    color = CRGB::Red;
+    g_active = 0;
+}
 
 
 int CEffectMgr::getNumLeds()
 {
     return g_numLEDs;
 }
-
-CRGB CEffectMgr::color = CRGB::Red;
-int CEffectMgr::g_active = 0;
 
 void CEffectMgr::init(int numLEDs)
 {
@@ -55,13 +58,13 @@ CEffectMgr::~CEffectMgr()
 void CCometEffect::Draw()
 {
     const byte fadeAmt = 128;
-    const int cometSize = min(3, CEffectMgr::getNumLeds() / 10);
+    const int cometSize = min(3, CFX.getNumLeds() / 10);
 
     static int iDirection = 1;
     static int iPos = 0;
 
     iPos += iDirection;
-    if (iPos >= (CEffectMgr::getNumLeds() - cometSize))
+    if (iPos >= (CFX.getNumLeds() - cometSize))
     {
         iDirection = -1;
     }
@@ -69,10 +72,10 @@ void CCometEffect::Draw()
         iDirection = 1;
 
     for (int i = 0; i < cometSize; i++)
-        FastLED.leds()[iPos + i] = CEffectMgr::color;
+        FastLED.leds()[iPos + i] = CFX.color;
 
     // Randomly fade the LEDs
-    for (int j = 0; j < CEffectMgr::getNumLeds(); j++)
+    for (int j = 0; j < CFX.getNumLeds(); j++)
         if (random(10) > 5)
             FastLED.leds()[j] = FastLED.leds()[j].fadeToBlackBy(fadeAmt);
 };
@@ -81,5 +84,5 @@ void CCometEffect::Draw()
 void CSolidEffect::Draw() 
 {
     for (int i = 0; i < FastLED.size(); i++) 
-        FastLED.leds()[i]= CEffectMgr::color;
+        FastLED.leds()[i]= CFX.color;
 }
