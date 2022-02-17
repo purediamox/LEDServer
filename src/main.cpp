@@ -11,16 +11,6 @@
 #include <qrcode.h>
 
 
-#include <FastLED.h>
-#define NUM_LEDS    30          // FastLED definitions
-#define LED_PIN     5
-
-CRGB g_LEDs[NUM_LEDS] = {0};    // Frame buffer for FastLED
-int g_Brightness = 10;         // 0-255 LED brightness scale
-int g_PowerLimit = 900;         // 900mW Power Limit
-
-CRGB g_color = CRGB::Red;
-
 #define OLED_CLOCK 15 // Pins for the OLED display
 #define OLED_DATA 4
 #define OLED_RESET 16
@@ -39,10 +29,8 @@ const char WIFI_PASSWORD[] = WIFI_PWD;
 
 
 
-#include "ledgfx.h"         // helper functions from Dave Plummer
+//#include "ledgfx.h"         // helper functions from Dave Plummer
 #include "comet.h"
-
-CEffect * g_pEffect = new CCometEffect();
 
 
 /**
@@ -61,9 +49,11 @@ AsyncWebServer server(80);
 
 
 
-
-
-void DrawQRCode(const char *url, int ox, int oy, int size)
+/*********************
+ * Draws QR code for the specified URL at the specific location on the screen 
+ * @param size size of QR code - typically 3.
+ ******/
+void DrawQRCode(const char *url, int ox, int oy, int size = 3)
 {
     QRCode qrcode;
 
@@ -141,7 +131,7 @@ void HandleSetColor(AsyncWebServerRequest *request)
     if (request->hasParam("color"))
     {
         const char* color_code = request->getParam("color")->value().c_str();
-        g_color = ParseRGBA(color_code);
+        CEffectMgr::color = ParseRGBA(color_code);
     }
 
 }
@@ -223,11 +213,8 @@ void setup()
 
     server.begin();
 
-    // FASTLED
-    FastLED.addLeds<WS2812B, LED_PIN, GRB>(g_LEDs, NUM_LEDS);               // Add our LED strip to the FastLED library
-    FastLED.setBrightness(g_Brightness);
-    set_max_power_indicator_LED(LED_BUILTIN);                               // Light the builtin LED if we power throttle
-    FastLED.setMaxPowerInMilliWatts(g_PowerLimit);                          // Set the power limit, above which brightness will be throttled
+    CEffectMgr::init(30);           // initialize with 30 LEDs
+
 
 
 }
@@ -235,6 +222,6 @@ void setup()
 
 void loop()
 {
-    g_pEffect->Draw();
+    CEffectMgr::getActiveEffect()->Draw();
     FastLED.delay(50);
 }
