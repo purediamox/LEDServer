@@ -11,7 +11,7 @@
 <body>
   <h1>Mark's ESP32 Light Server</h1>
 
-  Effect: <select id="sel_effect"></select>
+  Effect: <select id="sel_effect" onchange="set_effect(this.value)"></select>
   <hr>
 
   <input id="color_picker" type="color" oninput="set_Color(document.getElementById('color_picker').value)"></input>

@@ -46,6 +46,17 @@ CEffect* CEffectMgr::getActiveEffect()
     return _effects[g_active];
 }
 
+bool CEffectMgr::setActiveEffect(int id)
+{
+    if (id >= 0 && id < _effects.size())
+    {
+        g_active = id;
+        return true;
+
+    }
+    else
+        return false;
+}
 
 
 
@@ -79,6 +90,9 @@ void CCometEffect::Draw()
         if (random(10) > 5)
             FastLED.leds()[j] = FastLED.leds()[j].fadeToBlackBy(fadeAmt);
 };
+
+
+
 
 
 void CSolidEffect::Draw() 

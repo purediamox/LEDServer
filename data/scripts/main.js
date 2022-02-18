@@ -1,5 +1,16 @@
 "use strict";
 
+function set_effect(id) 
+{
+    console.log("set_effect");
+    console.log(id);
+    $.get("api/seteffect", 
+    { "id" : id }).done(
+        function(data) { }          // ignore the result - TODO this will obtain the settings
+    );
+}
+
+
 function set_Color(color)
 {
     console.log("api/setcolor(" + color + ")");

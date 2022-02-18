@@ -40,6 +40,7 @@ public:
     inline  CRGB* LEDs()  { return g_pLEDs; };
 
     CEffect* getActiveEffect();
+    bool setActiveEffect(int id);
 };
 
 extern CEffectMgr CFX;          // singleton

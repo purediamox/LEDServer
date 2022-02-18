@@ -28,7 +28,7 @@ U8G2_SSD1306_128X64_NONAME_F_HW_I2C g_OLED(U8G2_R2, OLED_RESET, OLED_CLOCK, OLED
 const char WIFI_SSID[] = WIFI_SSID2;
 const char WIFI_PASSWORD[] = WIFI_PWD;
 
-
+// TODO - look at Async WiFi connection and connection manager - https://github.com/khoih-prog/ESPAsync_WiFiManager#features
 
 
 //#include "ledgfx.h"         // helper functions from Dave Plummer
@@ -124,6 +124,24 @@ void HandleGetEffects(AsyncWebServerRequest *request)
     request->send(response);    
 }
 
+void HandleSetEffect(AsyncWebServerRequest *request) 
+{
+    if (request->hasParam("id"))
+    {
+        int id =  request->getParam("id")->value().toInt();
+        if (CFX.setActiveEffect(id))
+        {
+
+
+        }
+        // TODO: build response. containing new effect settings.
+        request->send(200, "OK");
+        return;
+    }
+    // fall thru - send an error
+    request->send(400, "bad id");
+}
+
 void HandleSetColor(AsyncWebServerRequest *request)
 {
     // List all parameters
@@ -216,7 +234,8 @@ void setup()
     // set up WebServer
     server.on("/api/setcolor", HTTP_GET, HandleSetColor);
     server.on("/api/geteffects", HTTP_GET, HandleGetEffects);
-    
+    server.on("/api/seteffect", HTTP_GET, HandleSetEffect); 
+   
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
           { request->send(SPIFFS, "/index.html", "text/html"); });
     
