@@ -10,19 +10,25 @@ function set_Color(color)
     );
 }
 
+function populate_effects()
+{
+    $.get("api/geteffects").done(function(data) {
+        console.log(data);
+        $("#sel_user").empty();
+        let effects = data['effects'];
+        let len = effects.length;
+
+        for( var i = 0; i<len; i++){
+            var id = effects[i]['n'];
+            var name = effects[i]['name'];
+            $("#sel_effect").append("<option value='"+id+"'>"+name+"</option>");
+        }
+    });
+}
+
 
 function init()
 {
     console.log("init");
-    //var parent = document.querySelector('#parent');
-    //var picker = new Picker(parent);
-
-    /*
-        You can do what you want with the chosen color using two callbacks: onChange and onDone.
-    */
-    //picker.onChange = function(color) {
-    //    parent.style.background = color.rgbaString;
-    //    console.log(color);
-    //    set_Color(color.rgbaString);
-    //};
+    populate_effects();
 }

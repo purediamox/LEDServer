@@ -29,8 +29,8 @@ void CEffectMgr::init(int numLEDs)
     memset(g_pLEDs, 0, sizeof(CRGB) * g_numLEDs);
 
     // add effects.
-    g_Effects.push_back(new CCometEffect());
-    g_Effects.push_back(new CSolidEffect());
+    _effects.push_back(new CCometEffect());
+    _effects.push_back(new CSolidEffect());
 
 
 
@@ -43,7 +43,7 @@ void CEffectMgr::init(int numLEDs)
 
 CEffect* CEffectMgr::getActiveEffect() 
 {
-    return g_Effects[g_active];
+    return _effects[g_active];
 }
 
 

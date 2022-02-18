@@ -25,8 +25,9 @@ private:
     CRGB* g_pLEDs;
     const int g_Brightness = 10;         // 0-255 LED brightness scale
     const int g_PowerLimit = 900;         // 900mW Power Limit
-    std::vector<CEffect*> g_Effects;
     int g_active;
+public:
+    std::vector<CEffect*> _effects;
 
 public:
     CEffectMgr();
