@@ -16,6 +16,22 @@
 
 class CEffect;
 
+typedef enum _property_type { PropEnd, PropInteger, PropColor } PROPERTY_TYPE;
+
+// Property array 
+typedef struct _propinfo
+{
+    const char* _name;
+    int _offset;
+    int _range;
+    PROPERTY_TYPE _type; 
+    _propinfo (PROPERTY_TYPE type,  const char* name, int offset, int range = 0) {
+        _name = name;
+        _type = type;
+        _offset = offset;
+        _range = range;
+    }
+} PROPINFO; 
 
 
 class CEffectMgr 
@@ -54,6 +70,7 @@ public:
     }
     virtual ~CEffect() {};
     virtual void Draw();
+    virtual PROPINFO* getPropinfo() { return NULL; }; 
 
     inline int size() { return CFX.getNumLeds();};
     inline CRGB* LEDs() { return CFX.LEDs();};
@@ -74,6 +91,13 @@ public:
 class CCometEffect : public CEffect
 {
 public:
-    CCometEffect() : CEffect("Comet"){};
+    int _fade;
+    CRGB _color;
+
+    CCometEffect();
     virtual void Draw();
+
+    static PROPINFO _Props[];
+    virtual PROPINFO* getPropinfo() { return _Props; }; 
+
 };

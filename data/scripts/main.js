@@ -37,9 +37,32 @@ function populate_effects()
     });
 }
 
+// create control for a property element
+function appendControl(parent, element)
+{
+    if (element.type == 1)  {       // integer
+        parent.append(`${element.name}: <input type="range" min="0" max="${element.range}" value="${element.value} class="slider" id="${element.n}"><input>`);
+    } else if (element.type == 2) {
+        parent.append(`${element.name}: <input type="color" value="${element.value}" class="slider" id="${element.n}"><input>`);
+    }
+}
+
+function populate_properties(data)
+{
+    data['props'].forEach(element => { appendControl($("#properties"), element);});
+}
+
+function get_effect_properties()
+{
+    $.get("api/geteffectprops").done(function(data) {
+        populate_properties(data);
+    });
+}
+
 
 function init()
 {
     console.log("init");
     populate_effects();
+    get_effect_properties();
 }

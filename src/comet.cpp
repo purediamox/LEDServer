@@ -65,10 +65,20 @@ CEffectMgr::~CEffectMgr()
     delete[] g_pLEDs;
 }
 
+PROPINFO CCometEffect::_Props[] =  { _propinfo(PropInteger, "fade", offsetof(CCometEffect, _fade), 255),
+                                     _propinfo(PropColor, "color", offsetof(CCometEffect, _color)),
+                                     _propinfo(PropEnd, NULL,0,  0)};   // end marker
+
+
+CCometEffect::CCometEffect() : CEffect("Comet")
+{
+    _fade = 128;
+    _color = CRGB::Blue;
+}
+
 
 void CCometEffect::Draw()
 {
-    const byte fadeAmt = 128;
     const int cometSize = min(3, CFX.getNumLeds() / 10);
 
     static int iDirection = 1;
@@ -83,12 +93,12 @@ void CCometEffect::Draw()
         iDirection = 1;
 
     for (int i = 0; i < cometSize; i++)
-        FastLED.leds()[iPos + i] = CFX.color;
+        FastLED.leds()[iPos + i] = _color;  
 
     // Randomly fade the LEDs
     for (int j = 0; j < CFX.getNumLeds(); j++)
         if (random(10) > 5)
-            FastLED.leds()[j] = FastLED.leds()[j].fadeToBlackBy(fadeAmt);
+            FastLED.leds()[j] = FastLED.leds()[j].fadeToBlackBy(_fade);
 };
 
 

@@ -124,23 +124,78 @@ void HandleGetEffects(AsyncWebServerRequest *request)
     request->send(response);    
 }
 
-void HandleSetEffect(AsyncWebServerRequest *request) 
+
+void SendEffectProperties(AsyncResponseStream *response, CEffect *pEffect)
 {
+    DynamicJsonDocument doc(1024);
+
+    PROPINFO * pProp = pEffect->getPropinfo();
+
+    if (pProp != NULL) {
+        int i = 0;
+        while (pProp->_type != PropEnd) 
+        {
+            doc["props"][i]["n"] = i;
+            doc["props"][i]["name"] = pProp->_name;
+            doc["props"][i]["range"] = pProp->_range;
+            doc["props"][i]["type"] = pProp->_type;
+            doc["props"][i]["offset"] = pProp->_offset;
+            if (pProp->_type == PropInteger) {
+                int valInt = *((int*)(((byte*)pEffect) + pProp->_offset)); // do pointer arithmetic in bytes, but cast pointer back to correct type before de-ref.
+                doc["props"][i]["value"] = valInt;
+            } else if (pProp->_type == PropColor) {
+                CRGB valClr = *((CRGB*)(((byte*)pEffect) + pProp->_offset));
+                int intClr = (valClr.r <<16) | (valClr.g << 8) | valClr.b;
+                char hex[10];
+                sprintf(hex, "#%6.6X", intClr);
+                doc["props"][i]["value"] = hex;
+            }
+            ++pProp;  // move to next
+            ++i;
+        }
+    }
+    serializeJson(doc, *response);
+}
+
+
+/****
+ * Returns value of numeric parameter or -1 if invalid
+ * @param request HTTP request
+ * @param param name of parameter
+ */
+int GetNumericParam(AsyncWebServerRequest *request, const char* param) {
     if (request->hasParam("id"))
     {
-        int id =  request->getParam("id")->value().toInt();
+        int id =  request->getParam("id")->value().toInt();   // toInt() returns 0 for non-valid input. 
+        return id;        
+    }        
+    else
+        return -1;
+}
+
+void HandleGetEffectProperties(AsyncWebServerRequest *request) {
+    AsyncResponseStream *response = request->beginResponseStream("application/json");
+    SendEffectProperties(response, CFX.getActiveEffect());
+    request->send(response);   
+}
+
+void HandleSetEffect(AsyncWebServerRequest *request) 
+{
+    int id = GetNumericParam(request, "id");
+    if (id >= 0)
+    {
         if (CFX.setActiveEffect(id))
         {
-
-
+            AsyncResponseStream *response = request->beginResponseStream("application/json");
+            SendEffectProperties(response, CFX.getActiveEffect());
+            request->send(response);   
         }
-        // TODO: build response. containing new effect settings.
-        request->send(200, "OK");
         return;
     }
     // fall thru - send an error
-    request->send(400, "bad id");
+    request->send(400, "bad id parameter");
 }
+
 
 void HandleSetColor(AsyncWebServerRequest *request)
 {
@@ -235,6 +290,7 @@ void setup()
     server.on("/api/setcolor", HTTP_GET, HandleSetColor);
     server.on("/api/geteffects", HTTP_GET, HandleGetEffects);
     server.on("/api/seteffect", HTTP_GET, HandleSetEffect); 
+    server.on("/api/geteffectprops", HTTP_GET, HandleGetEffectProperties);
    
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
           { request->send(SPIFFS, "/index.html", "text/html"); });
