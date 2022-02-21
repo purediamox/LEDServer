@@ -50,7 +50,6 @@ public:
     virtual ~CEffectMgr();
 
      int getNumLeds();
-     int getLEDs();
      CRGB color;
      void init(int NumLeds);
     inline  CRGB* LEDs()  { return g_pLEDs; };
