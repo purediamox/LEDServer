@@ -30,12 +30,7 @@ const char WIFI_PASSWORD[] = WIFI_PWD;
 
 // TODO - look at Async WiFi connection and connection manager - https://github.com/khoih-prog/ESPAsync_WiFiManager#features
 
-
-//#include "ledgfx.h"         // helper functions from Dave Plummer
 #include "comet.h"
-
-
-extern CRGB ParseRGBA(const char* rrggbb);
 
 int g_fontht = 0;
 wl_status_t wifi_status = WL_DISCONNECTED;
@@ -173,6 +168,9 @@ void HandleGetEffectProperties(AsyncWebServerRequest *request) {
     request->send(response);   
 }
 
+/** 
+ * Handles changing of the effect request
+ */
 void HandleSetEffect(AsyncWebServerRequest *request) 
 {
     int id = GetNumericParam(request, "id");
@@ -195,10 +193,9 @@ void HandleSetEffect(AsyncWebServerRequest *request)
  * Handle setting of a property on the effect
  *  effect=id, prop=id, value=value (either color code or integer)
  * */
-
 void HandleSetProperty(AsyncWebServerRequest *request) 
 {
-    int effectid = GetNumericParam(request, "effectid");
+    int effectid = GetNumericParam(request, "effectid");        // TODO check this matches
     int propid = GetNumericParam(request, "propid");
     if (request->hasParam("value"))
     {
@@ -215,35 +212,6 @@ void HandleSetProperty(AsyncWebServerRequest *request)
 
 
 
-void HandleSetColor(AsyncWebServerRequest *request)
-{
-    // List all parameters
-    int params = request->params();
-    for (int i = 0; i < params; i++)
-    {
-        AsyncWebParameter *p = request->getParam(i);
-        if (p->isFile())
-        { // p->isPost() is also true
-            Serial.printf("FILE[%s]: %s, size: %u\n", p->name().c_str(), p->value().c_str(), p->size());
-        }
-        else if (p->isPost())
-        {
-            Serial.printf("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
-        }
-        else
-        {
-            Serial.printf("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
-        }
-        request->send(200, "OK");
-    }
-
-    if (request->hasParam("color"))
-    {
-        const char* color_code = request->getParam("color")->value().c_str();
-        CFX.color = ParseRGBA(color_code);
-    }
-
-}
 
 void setup()
 {
@@ -305,7 +273,6 @@ void setup()
     g_OLED.sendBuffer();
 
     // set up WebServer
-    server.on("/api/setcolor", HTTP_GET, HandleSetColor);
     server.on("/api/geteffects", HTTP_GET, HandleGetEffects);
     server.on("/api/seteffect", HTTP_GET, HandleSetEffect); 
     server.on("/api/geteffectprops", HTTP_GET, HandleGetEffectProperties);
@@ -313,24 +280,13 @@ void setup()
    
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
           { request->send(SPIFFS, "/index.html", "text/html"); });
-    
+   
     server.serveStatic("/scripts", SPIFFS, "/scripts");
-
-// see: https://github.com/me-no-dev/ESPAsyncWebServer#respond-with-content-coming-from-a-file
-// server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-//           { request->send_P(200, "text/html", index_html); });
-// server.on("/index.html", HTTP_GET, [](AsyncWebServerRequest *request)
-//          { request->send(SPIFFS, "/index.html", "text/html"); });
-
-// server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request)
-//           { request->send(SPIFFS, "/style.css", "text/css"); });
+    // see: https://github.com/me-no-dev/ESPAsyncWebServer#respond-with-content-coming-from-a-file
 
     server.begin();
 
     CFX.init(30);           // initialize with 30 LEDs
-
-
-
 }
 
 

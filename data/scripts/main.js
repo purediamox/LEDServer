@@ -11,16 +11,6 @@ function set_effect(id)
 }
 
 
-function set_Color(color)
-{
-    console.log("api/setcolor(" + color + ")");
-    console.log(color);
-    $.get("api/setcolor", 
-    { "color" : color }).done(
-        function(data) { }          // ignore the result.
-    );
-}
-
 function populate_effects()
 {
     $.get("api/geteffects").done(function(data) {
