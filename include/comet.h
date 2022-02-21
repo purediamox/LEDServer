@@ -88,8 +88,12 @@ private:
 class CSolidEffect : public CEffect
 {
 public:
-    CSolidEffect() : CEffect("Solid"){};
+    CSolidEffect() : CEffect("Solid") { _color = CRGB::Red;};
     virtual void Draw();
+    virtual const PROPINFO* getPropinfo();
+private:
+    CRGB _color;
+    static const PROPINFO _Props[];
 };
 
 

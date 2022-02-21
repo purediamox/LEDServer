@@ -158,6 +158,10 @@ const String& CEffect::getPropertyValue(int propid)
 }
 
 
+///////////////////////////////////
+// CCometEffect
+///////////////////////////////////
+
 PROPINFO CCometEffect::_Props[] =  { _propinfo(PropInteger, "fade", offsetof(CCometEffect, _fade), 255),
                                      _propinfo(PropColor, "color", offsetof(CCometEffect, _color)),
                                      _propinfo(PropEnd, NULL,0,  0)};   // end marker
@@ -196,11 +200,20 @@ void CCometEffect::Draw()
 };
 
 
+///////////////////////////////////
+// CSolidEffect
+///////////////////////////////////
 
+const PROPINFO CSolidEffect::_Props[] =  { _propinfo(PropColor, "color", offsetof(CSolidEffect, _color)),
+                                     _propinfo(PropEnd, NULL,0,  0)};   // end marker
+
+const PROPINFO* CSolidEffect::getPropinfo() {
+    return  CSolidEffect::_Props;
+}
 
 
 void CSolidEffect::Draw() 
 {
     for (int i = 0; i < FastLED.size(); i++) 
-        FastLED.leds()[i]= CFX.color;
+        FastLED.leds()[i]= _color;
 }

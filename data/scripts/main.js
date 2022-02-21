@@ -6,7 +6,9 @@ function set_effect(id)
     console.log(id);
     $.get("api/seteffect", 
     { "id" : id }).done(
-        function(data) { }          // ignore the result - TODO this will obtain the settings
+        function(data) { 
+            populate_properties(data)          // if successful this will give us the properties
+        }          
     );
 }
 
@@ -36,7 +38,6 @@ function set_prop(from)
         "value": from.value }).done(function (data){
             console.log(data);
         });
-
 }
 
 // create control for a property element
@@ -51,6 +52,7 @@ function appendControl(parent, element)
 
 function populate_properties(data)
 {
+    $("#properties").empty();
     data['props'].forEach(element => { appendControl($("#properties"), element); 
                                        $("#properties").append("<p>");
                                     });
