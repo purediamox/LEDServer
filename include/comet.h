@@ -33,6 +33,14 @@ typedef struct _propinfo
     }
 } PROPINFO; 
 
+// Macros for property map
+#define BEGIN_PROPERTY_MAP(EFFECT)    const PROPINFO EFFECT::_Props[] = {
+#define END_PROPERTY_MAP()            _propinfo(PropEnd, NULL, 0 , 0)};
+#define PROPERTY_INT(EFFECT, EFFECT_FIELD, EFFECT_NAME, EFFECT_MAX)   _propinfo(PropInteger, EFFECT_NAME, offsetof(EFFECT, EFFECT_FIELD), EFFECT_MAX),
+#define PROPERTY_COLOR(EFFECT, EFFECT_FIELD, EFFECT_NAME          )   _propinfo(PropColor, EFFECT_NAME, offsetof(EFFECT, EFFECT_FIELD)),
+
+#define DECLARE_PROPERTY_MAP(EFFECT)   static const PROPINFO _Props[];  virtual const PROPINFO* getPropinfo() { return EFFECT::_Props; };
+
 
 class CEffectMgr 
 {
@@ -88,11 +96,14 @@ class CSolidEffect : public CEffect
 {
 public:
     CSolidEffect() : CEffect("Solid") { _color = CRGB::Red;};
+
+    DECLARE_PROPERTY_MAP(CSolidEffect);
+
     virtual void Draw();
-    virtual const PROPINFO* getPropinfo();
+//    virtual const PROPINFO* getPropinfo();
 private:
     CRGB _color;
-    static const PROPINFO _Props[];
+//    static const PROPINFO _Props[];
 };
 
 
@@ -106,7 +117,6 @@ public:
     CCometEffect();
     virtual void Draw();
 
-    static PROPINFO _Props[];
-    virtual PROPINFO* getPropinfo() { return _Props; }; 
+    DECLARE_PROPERTY_MAP(CCometEffect);
 
 };

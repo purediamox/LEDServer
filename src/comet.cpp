@@ -8,6 +8,10 @@
 
 class ClassicFireEffect : public CEffect
 {
+public:
+    DECLARE_PROPERTY_MAP(ClassicFireEffect)
+
+
 protected:
     int     Size;
     int     Cooling;
@@ -29,7 +33,8 @@ protected:
     static const byte BlendTotal = (BlendSelf + BlendNeighbor1 + BlendNeighbor2 + BlendNeighbor3);
 
 public:
-    
+
+
     // Lower sparking -> more flicker.  Higher sparking -> more consistent flame
 
     ClassicFireEffect(int cooling = 80, int sparking = 50, int sparks = 3, int sparkHeight = 4, bool breversed = true, bool bmirrored = true) 
@@ -55,7 +60,6 @@ public:
 
     virtual void Draw()
     {
-        Serial.printf("Classic Fire Draw\n");
         // First cool each cell by a little bit
         for (int i = 0; i < Size; i++)
             heat[i] = max(0L, heat[i] - random(0, ((Cooling * 10) / Size) + 2));
@@ -93,6 +97,10 @@ public:
     }
 };
 
+BEGIN_PROPERTY_MAP(ClassicFireEffect) 
+    PROPERTY_INT(ClassicFireEffect, Cooling, "Cooling", 100)
+    PROPERTY_INT(ClassicFireEffect, Sparking, "Sparking", 255)
+END_PROPERTY_MAP()
 
 
 
@@ -336,13 +344,16 @@ const String& CEffect::getPropertyValue(int propid)
 ///////////////////////////////////
 
 
-#define BEGIN_PROPERTY_MAP(EFFECT)    PROPINFO EFFECT::_Props = {
-#define END_PROPERTY_MAP()            _propInfo(PropEnd, NULL, 0 , 0)};
 
+BEGIN_PROPERTY_MAP(CCometEffect)
+    PROPERTY_INT(CCometEffect, _fade, "Fade", 255)
+    PROPERTY_COLOR(CCometEffect, _color, "Color")
+END_PROPERTY_MAP()
 
-PROPINFO CCometEffect::_Props[] =  { _propinfo(PropInteger, "fade", offsetof(CCometEffect, _fade), 255),
-                                     _propinfo(PropColor, "color", offsetof(CCometEffect, _color)),
-                                     _propinfo(PropEnd, NULL,0,  0)};   // end marker
+//PROPINFO CCometEffect::_Props[] =  { 
+//                                     _propinfo(PropInteger, "fade", offsetof(CCometEffect, _fade), 255),
+//                                     _propinfo(PropColor, "color", offsetof(CCometEffect, _color)),
+//                                     _propinfo(PropEnd, NULL,0,  0)};   // end marker
 
 
 
@@ -385,9 +396,9 @@ void CCometEffect::Draw()
 const PROPINFO CSolidEffect::_Props[] =  { _propinfo(PropColor, "color", offsetof(CSolidEffect, _color)),
                                      _propinfo(PropEnd, NULL,0,  0)};   // end marker
 
-const PROPINFO* CSolidEffect::getPropinfo() {
-    return  CSolidEffect::_Props;
-}
+//const PROPINFO* CSolidEffect::getPropinfo() {
+//    return  CSolidEffect::_Props;
+//}
 
 
 void CSolidEffect::Draw() 
