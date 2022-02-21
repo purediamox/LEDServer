@@ -65,15 +65,21 @@ class CEffect
 {
 public:
     const char *name;
-    CEffect(const char *name) : name(name)
-    {
-    }
-    virtual ~CEffect() {};
-    virtual void Draw();
-    virtual PROPINFO* getPropinfo() { return NULL; }; 
+    CEffect(const char *name);
+    virtual ~CEffect();
+    virtual void Draw() = 0;
+    virtual const PROPINFO* getPropinfo();
+
+    bool setPropertyValue(int propid, const String& value);
+    const String& getPropertyValue(int propid); 
 
     inline int size() { return CFX.getNumLeds();};
     inline CRGB* LEDs() { return CFX.LEDs();};
+
+private:
+    int _numPropInfo;
+    int CountProperties(); 
+
 };
 
 

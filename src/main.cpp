@@ -35,19 +35,13 @@ const char WIFI_PASSWORD[] = WIFI_PWD;
 #include "comet.h"
 
 
-/**
- * Parses color value "#RRGGBB" into a CGRB value
- */
-CRGB ParseRGBA(const char* rrggbb)
-{
-    int i_hex = std::strtol(rrggbb + 1, nullptr, 16);
-    return CRGB(i_hex);
-}
+extern CRGB ParseRGBA(const char* rrggbb);
 
 int g_fontht = 0;
 wl_status_t wifi_status = WL_DISCONNECTED;
 
 AsyncWebServer server(80);
+
 
 
 
@@ -129,7 +123,7 @@ void SendEffectProperties(AsyncResponseStream *response, CEffect *pEffect)
 {
     DynamicJsonDocument doc(1024);
 
-    PROPINFO * pProp = pEffect->getPropinfo();
+    const PROPINFO * pProp = pEffect->getPropinfo();
 
     if (pProp != NULL) {
         int i = 0;
@@ -164,9 +158,9 @@ void SendEffectProperties(AsyncResponseStream *response, CEffect *pEffect)
  * @param param name of parameter
  */
 int GetNumericParam(AsyncWebServerRequest *request, const char* param) {
-    if (request->hasParam("id"))
+    if (request->hasParam(param))
     {
-        int id =  request->getParam("id")->value().toInt();   // toInt() returns 0 for non-valid input. 
+        int id =  request->getParam(param)->value().toInt();   // toInt() returns 0 for non-valid input. 
         return id;        
     }        
     else
@@ -195,6 +189,30 @@ void HandleSetEffect(AsyncWebServerRequest *request)
     // fall thru - send an error
     request->send(400, "bad id parameter");
 }
+
+
+/***
+ * Handle setting of a property on the effect
+ *  effect=id, prop=id, value=value (either color code or integer)
+ * */
+
+void HandleSetProperty(AsyncWebServerRequest *request) 
+{
+    int effectid = GetNumericParam(request, "effectid");
+    int propid = GetNumericParam(request, "propid");
+    if (request->hasParam("value"))
+    {
+        const String& value = request->getParam("value")->value();
+        Serial.printf("setprop %d, %s", propid, value.c_str());
+        // TODO check effect id
+        if (CFX.getActiveEffect()->setPropertyValue(propid, value)){
+            request->send(200, "OK");
+            return;
+        }
+    }
+    request->send(400, "bad params");    
+}
+
 
 
 void HandleSetColor(AsyncWebServerRequest *request)
@@ -291,6 +309,7 @@ void setup()
     server.on("/api/geteffects", HTTP_GET, HandleGetEffects);
     server.on("/api/seteffect", HTTP_GET, HandleSetEffect); 
     server.on("/api/geteffectprops", HTTP_GET, HandleGetEffectProperties);
+    server.on("/api/setprop", HTTP_GET, HandleSetProperty);
    
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
           { request->send(SPIFFS, "/index.html", "text/html"); });
