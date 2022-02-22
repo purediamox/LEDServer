@@ -33,13 +33,17 @@ typedef struct _propinfo
     }
 } PROPINFO; 
 
-// Macros for property map
+// Macros for property map - see readme.md and CSolidEffect class for examples of use.
+
+// Declare the effect has properties 
+#define DECLARE_PROPERTY_MAP(EFFECT)   static const PROPINFO _Props[];  virtual const PROPINFO* getPropinfo() { return EFFECT::_Props; };
+
+// Define the properties in the property map - these should go outside the class.
 #define BEGIN_PROPERTY_MAP(EFFECT)    const PROPINFO EFFECT::_Props[] = {
 #define END_PROPERTY_MAP()            _propinfo(PropEnd, NULL, 0 , 0)};
 #define PROPERTY_INT(EFFECT, EFFECT_FIELD, EFFECT_NAME, EFFECT_MAX)   _propinfo(PropInteger, EFFECT_NAME, offsetof(EFFECT, EFFECT_FIELD), EFFECT_MAX),
 #define PROPERTY_COLOR(EFFECT, EFFECT_FIELD, EFFECT_NAME          )   _propinfo(PropColor, EFFECT_NAME, offsetof(EFFECT, EFFECT_FIELD)),
 
-#define DECLARE_PROPERTY_MAP(EFFECT)   static const PROPINFO _Props[];  virtual const PROPINFO* getPropinfo() { return EFFECT::_Props; };
 
 
 class CEffectMgr 
@@ -57,9 +61,9 @@ public:
     CEffectMgr();
     virtual ~CEffectMgr();
 
-     int getNumLeds();
-     CRGB color;
-     void init(int NumLeds);
+    int getNumLeds();
+    CRGB color;
+    void init(int NumLeds);
     inline  CRGB* LEDs()  { return g_pLEDs; };
 
     CEffect* getActiveEffect();
@@ -74,24 +78,44 @@ public:
     const char *name;
     CEffect(const char *name);
     virtual ~CEffect();
+    
+    /**
+     * Override this function with your draw code. Must be overridden
+     */ 
     virtual void Draw() = 0;
+
     virtual const PROPINFO* getPropinfo();
 
+    /**
+     * Set a property value
+     */
     bool setPropertyValue(int propid, const String& value);
+    
+    /***
+     * Returns the value of a property 
+     */
     const String& getPropertyValue(int propid); 
 
+    /***
+     * Helper function size of the LED array
+     */
     inline int size() { return CFX.getNumLeds();};
+
+    /***
+     * Helper function - pointer to LED buffer
+     */
     inline CRGB* LEDs() { return CFX.LEDs();};
 
 private:
-    int _numPropInfo;
-    int CountProperties(); 
-
+    int _numPropInfo;               // cache of number of properties
+    int CountProperties();          // returns count of property map entries
 };
 
 
 
-
+/*****
+ * Simplest effect possible - draw a solid color
+ */
 class CSolidEffect : public CEffect
 {
 public:
@@ -100,10 +124,9 @@ public:
     DECLARE_PROPERTY_MAP(CSolidEffect);
 
     virtual void Draw();
-//    virtual const PROPINFO* getPropinfo();
+
 private:
-    CRGB _color;
-//    static const PROPINFO _Props[];
+    CRGB _color;   // note the properties are private as they are accessed directly
 };
 
 
@@ -118,5 +141,4 @@ public:
     virtual void Draw();
 
     DECLARE_PROPERTY_MAP(CCometEffect);
-
 };

@@ -11,7 +11,6 @@ class ClassicFireEffect : public CEffect
 public:
     DECLARE_PROPERTY_MAP(ClassicFireEffect)
 
-
 protected:
     int     Size;
     int     Cooling;
@@ -101,85 +100,6 @@ BEGIN_PROPERTY_MAP(ClassicFireEffect)
     PROPERTY_INT(ClassicFireEffect, Cooling, "Cooling", 100)
     PROPERTY_INT(ClassicFireEffect, Sparking, "Sparking", 255)
 END_PROPERTY_MAP()
-
-
-
-
-
-
-class FireEffectSmooth : public CEffect
-{
-  protected:
-    float  * Temperatures;
-    float    LastDraw;                  // Last time we drew the flame
-
-    const float IGNITION_KNOB = 50.0f;  // Preference-based constant factor for ignition rate
-    const float SPREADRATE_KNOB = 12.0f; // Preference-based constant for flame spread rate
-    const float SPARKRATE_KNOB  = 8.0f; // Preference-based constant for spark ignition rate
-
-  public:
-    bool    Mirrored;                   // Should the flame be mirrored, drawn from both sides?
-    bool    Reversed;                   // Only applicable when not reversed, should it be reversed?
-    float   Cooling;                    // Pixel cooldown rate 
-    int     Size;
-    int     SparkHeight;                // Ignition zone for where new pixels start up
-    float   SparkProbability;           // Probability of a spark in each ignition zone pixel
-    float   SpreadRate;                 // Rate at which fire spreads pixel to pixel
-    
-    FireEffectSmooth(bool mirrored = true, bool reversed = false, int sparkHeight = 0, float sparkProbability = 1.0, float cooling = 1.0, float spreadRate = 1.0) : CEffect("Fire")
-    {
-        Mirrored         = mirrored;
-        Size             = CFX.getNumLeds();                                            // 
-        if (mirrored)
-            Size /= 2;
-
-        Reversed         = reversed;
-        Cooling          = cooling;
-        SparkHeight      = sparkHeight;                                     // 
-        SparkProbability = sparkProbability * SPARKRATE_KNOB / SparkHeight; // Chance that each LED cell will ignite when tested
-        Temperatures     = new float[Size];                                 // Array of temperatures, one per LED
-        SpreadRate       = spreadRate * SPREADRATE_KNOB;                    // How fast the flame spreads per second
-        LastDraw         = UnixTime();                                      // Start of time
-    }
-
-    virtual ~FireEffectSmooth()               // Because we have a virtual function, destructor is virtual as well
-    {
-        delete [] Temperatures;
-    }
-
-    void Draw()
-    {
-        FastLED.clear();
-
-        float elapsedSeconds = UnixTime() - LastDraw;
-        float cooldown = 1.0f * RandomFloat() * Cooling * elapsedSeconds;
-        LastDraw = UnixTime();
-
-        for (int i = 0; i < Size; i++)
-        {
-            Temperatures[i] = max(0.0f, Temperatures[i] - cooldown); // Cool cell by cooldown amount, but don't go below zero
-            
-            int neighborIndex = (i == 0) ? Size - 1 : i - 1;        // Index of cell to our left, wrapping around to front
-            float spreadAmount = min(0.25f, Temperatures[neighborIndex]) * SpreadRate * elapsedSeconds;
-            spreadAmount = min(Temperatures[neighborIndex], spreadAmount);
-            Temperatures[i]             += spreadAmount;            // Exchange 'spreadAmount' of heat between cells
-            Temperatures[neighborIndex] -= spreadAmount;
-
-            // Check to see if this cell ignites a new spark
-            if (i <= SparkHeight && RandomFloat() < SparkProbability * elapsedSeconds)
-            {
-                //Temperatures[i] = Temperatures[i] + RandomFloat() * 30 * elapsedSeconds;
-                Temperatures[i] = 2.0; // min(1.0f, (Temperatures[i] + RandomFloat() * 30 * elapsedSeconds));
-                //printf("Spark at %d: %f", i, Temperatures[i]);
-            }
-        }
-        for (int i = 0; i < Size; i++)
-        {
-            CFX.LEDs()[i] = HeatColor(240 * min(1.0f, Temperatures[i]));
-        }
-    }
-};
-
 
 
 
