@@ -33,17 +33,30 @@ typedef struct _propinfo
     }
 } PROPINFO; 
 
+
+// Pragma to suppress compiler warning on offsetof
+#define PRAGMA_IGNORE_OFFSET_PUSH  \
+    _Pragma("GCC diagnostic push") \
+    _Pragma("GCC diagnostic ignored \"-Winvalid-offsetof\"") 
+ 
+#define PRAGMA_IGNORE_OFFSET_POP \
+    _Pragma("GCC diagnostic pop") 
+
 // Macros for property map - see readme.md and CSolidEffect class for examples of use.
 
 // Declare the effect has properties 
 #define DECLARE_PROPERTY_MAP(EFFECT)   static const PROPINFO _Props[];  virtual const PROPINFO* getPropinfo() { return EFFECT::_Props; };
 
 // Define the properties in the property map - these should go outside the class.
-#define BEGIN_PROPERTY_MAP(EFFECT)    const PROPINFO EFFECT::_Props[] = {
-#define END_PROPERTY_MAP()            _propinfo(PropEnd, NULL, 0 , 0)};
+#define BEGIN_PROPERTY_MAP(EFFECT)     PRAGMA_IGNORE_OFFSET_PUSH\
+  const PROPINFO EFFECT::_Props[] = {   
+
+#define END_PROPERTY_MAP()            _propinfo(PropEnd, NULL, 0 , 0)}; \
+    PRAGMA_IGNORE_OFFSET_POP
+
+
 #define PROPERTY_INT(EFFECT, EFFECT_FIELD, EFFECT_NAME, EFFECT_MAX)   _propinfo(PropInteger, EFFECT_NAME, offsetof(EFFECT, EFFECT_FIELD), EFFECT_MAX),
 #define PROPERTY_COLOR(EFFECT, EFFECT_FIELD, EFFECT_NAME          )   _propinfo(PropColor, EFFECT_NAME, offsetof(EFFECT, EFFECT_FIELD)),
-
 
 
 class CEffectMgr 

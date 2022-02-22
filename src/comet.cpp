@@ -96,12 +96,11 @@ public:
     }
 };
 
+
 BEGIN_PROPERTY_MAP(ClassicFireEffect) 
     PROPERTY_INT(ClassicFireEffect, Cooling, "Cooling", 100)
     PROPERTY_INT(ClassicFireEffect, Sparking, "Sparking", 255)
 END_PROPERTY_MAP()
-
-
 
 
 CEffectMgr CFX;          // singleton
@@ -130,9 +129,7 @@ void CEffectMgr::init(int numLEDs)
     // add effects - assuming number of LED must have been set by the time we get here
     _effects.push_back(new CCometEffect());
     _effects.push_back(new CSolidEffect());
-    _effects.push_back(new FireEffectSmooth());
     _effects.push_back(new ClassicFireEffect());
-
 
 
     // FASTLED
@@ -255,7 +252,7 @@ const String& CEffect::getPropertyValue(int propid)
             return String(hex);
         }
     }
-    return "";          // return an empty string (represents invalid)
+    return String("");          // return an empty string (represents invalid)
 }
 
 
@@ -313,12 +310,9 @@ void CCometEffect::Draw()
 // CSolidEffect
 ///////////////////////////////////
 
-const PROPINFO CSolidEffect::_Props[] =  { _propinfo(PropColor, "color", offsetof(CSolidEffect, _color)),
-                                     _propinfo(PropEnd, NULL,0,  0)};   // end marker
-
-//const PROPINFO* CSolidEffect::getPropinfo() {
-//    return  CSolidEffect::_Props;
-//}
+BEGIN_PROPERTY_MAP(CSolidEffect) 
+    PROPERTY_COLOR(CSolidEffect, _color, "Color")
+END_PROPERTY_MAP()
 
 
 void CSolidEffect::Draw() 
