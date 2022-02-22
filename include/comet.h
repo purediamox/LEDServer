@@ -107,7 +107,7 @@ public:
     /***
      * Returns the value of a property 
      */
-    const String& getPropertyValue(int propid); 
+    const String getPropertyValue(int propid); 
 
     /***
      * Helper function size of the LED array

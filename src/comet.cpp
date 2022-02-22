@@ -235,7 +235,7 @@ bool CEffect::setPropertyValue(int propid, const String& value)
 }
 
 
-const String& CEffect::getPropertyValue(int propid)
+const String CEffect::getPropertyValue(int propid)
 {
     const PROPINFO *pPropInfo = this->getPropinfo();
     if (propid >= 0 && propid < _numPropInfo) {
